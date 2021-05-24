@@ -36,6 +36,9 @@ func (u URL) String() string {
 		fullURL.WriteString("@")
 	}
 	fullURL.WriteString(u.Host)
+	if u.Port != "" {
+		fullURL.WriteString(":" + u.Port)
+	}
 	fullURL.WriteString(u.RequestURI)
 	return fullURL.String()
 }
@@ -61,8 +64,12 @@ func ParseWithScheme(u string) (*URL, error) {
 
 	// scheme
 	scheme := U.Scheme
+
 	// get host
 	host := U.Host
+	if port != "" {
+		host = TrimPort(host, port)
+	}
 
 	// get credentials if any
 	var username, password string
@@ -89,6 +96,10 @@ func ParseWithScheme(u string) (*URL, error) {
 }
 
 func PreprendDefaultScheme(u string) string {
+	if stringsutil.HasPrefixI(u, HTTP+schemeSeparator) || stringsutil.HasPrefixI(u, HTTPS+schemeSeparator) {
+		return u
+	}
+
 	return PreprendScheme(u, HTTPS)
 }
 
@@ -129,4 +140,8 @@ func defaultPortForProtocol(protocol string) string {
 	}
 
 	return DefaultHTTPPort
+}
+
+func TrimPort(host, port string) string {
+	return strings.TrimSuffix(host, ":"+port)
 }
