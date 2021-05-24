@@ -145,3 +145,9 @@ func defaultPortForProtocol(protocol string) string {
 func TrimPort(host, port string) string {
 	return strings.TrimSuffix(host, ":"+port)
 }
+
+func TrimScheme(host string) string {
+	r := strings.TrimPrefix(host, HTTP+schemeSeparator)
+	r = strings.TrimPrefix(r, HTTPS+schemeSeparator)
+	return r
+}
