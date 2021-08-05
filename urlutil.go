@@ -55,7 +55,9 @@ func ParseWithScheme(u string) (*URL, error) {
 	U, err := url.Parse(u)
 	if err != nil {
 		// try to reparse without the request path
-		forwardSlashPosition := strings.Index(u, "/")
+		// attempt to find the forward slash at the beginning of the path
+		schemeDoubleForwardSlash := strings.Index(u, "//") + 2
+		forwardSlashPosition := schemeDoubleForwardSlash + strings.Index(u[schemeDoubleForwardSlash:], "/")
 		if forwardSlashPosition > 0 {
 			origReqURI = u[forwardSlashPosition:]
 			u = u[:forwardSlashPosition]
