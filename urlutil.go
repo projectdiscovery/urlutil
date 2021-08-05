@@ -51,9 +51,21 @@ func ParseWithScheme(u string) (*URL, error) {
 	// prepend default scheme if absent to increase parsing capabilities
 	u = PreprendDefaultScheme(u)
 
+	var origReqURI string
 	U, err := url.Parse(u)
 	if err != nil {
-		return nil, err
+		// try to reparse without the request path
+		forwardSlashPosition := strings.Index(u, "/")
+		if forwardSlashPosition > 0 {
+			origReqURI = u[forwardSlashPosition:]
+			u = u[:forwardSlashPosition]
+			U, err = url.Parse(u)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	// attempts to infer port
@@ -83,6 +95,9 @@ func ParseWithScheme(u string) (*URL, error) {
 	// for our specific case we set this to empty if it equals to "/"
 	if ruri := U.RequestURI(); ruri != "/" {
 		requri = ruri
+	}
+	if origReqURI != "" && origReqURI != "/" {
+		requri = origReqURI
 	}
 
 	return &URL{
