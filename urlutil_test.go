@@ -43,4 +43,9 @@ func TestParse(t *testing.T) {
 	require.Nil(t, err, "could not parse url")
 	U.Port = "15000"
 	require.Equal(t, "https://a.b.c.d:15000", U.String(), "port not replaced")
+
+	// replacing port
+	U, err = Parse("https://a.b.c.d//d")
+	require.Nil(t, err, "could not parse url")
+	require.Equal(t, "https://a.b.c.d:443//d", U.String(), "unexpected url")
 }
