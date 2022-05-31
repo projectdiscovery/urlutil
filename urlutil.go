@@ -22,6 +22,7 @@ type URL struct {
 	Host       string
 	Port       string
 	RequestURI string
+	Fragment   string
 }
 
 func (u URL) String() string {
@@ -40,6 +41,12 @@ func (u URL) String() string {
 		fullURL.WriteString(":" + u.Port)
 	}
 	fullURL.WriteString(u.RequestURI)
+	if u.Fragment != "" && u.RequestURI == "" {
+		fullURL.WriteString("/")
+	}
+	if u.Fragment != "" {
+		fullURL.WriteString("#" + u.Fragment)
+	}
 	return fullURL.String()
 }
 
@@ -51,9 +58,23 @@ func ParseWithScheme(u string) (*URL, error) {
 	// prepend default scheme if absent to increase parsing capabilities
 	u = PreprendDefaultScheme(u)
 
+	var origReqURI string
 	U, err := url.Parse(u)
 	if err != nil {
-		return nil, err
+		// try to reparse without the request path
+		// attempt to find the forward slash at the beginning of the path
+		schemeDoubleForwardSlash := strings.Index(u, "//") + 2
+		forwardSlashPosition := schemeDoubleForwardSlash + strings.Index(u[schemeDoubleForwardSlash:], "/")
+		if forwardSlashPosition > 0 {
+			origReqURI = u[forwardSlashPosition:]
+			u = u[:forwardSlashPosition]
+			U, err = url.Parse(u)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	// attempts to infer port
@@ -84,7 +105,15 @@ func ParseWithScheme(u string) (*URL, error) {
 	if ruri := U.RequestURI(); ruri != "/" {
 		requri = ruri
 	}
+	if origReqURI != "" && origReqURI != "/" {
+		requri = origReqURI
+	}
 
+	//fragment
+	var fragment string
+	if U.Fragment != "" {
+		fragment = U.Fragment
+	}
 	return &URL{
 		Scheme:     scheme,
 		Host:       host,
@@ -92,6 +121,7 @@ func ParseWithScheme(u string) (*URL, error) {
 		Password:   password,
 		Port:       port,
 		RequestURI: requri,
+		Fragment:   fragment,
 	}, nil
 }
 
