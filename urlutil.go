@@ -41,10 +41,10 @@ func (u URL) String() string {
 		fullURL.WriteString(":" + u.Port)
 	}
 	fullURL.WriteString(u.RequestURI)
-	if u.Fragment != "" && u.RequestURI == "" {
-		fullURL.WriteString("/")
-	}
 	if u.Fragment != "" {
+		if u.RequestURI == "" {
+			fullURL.WriteString("/")
+		}
 		fullURL.WriteString("#" + u.Fragment)
 	}
 	return fullURL.String()
@@ -110,10 +110,8 @@ func ParseWithScheme(u string) (*URL, error) {
 	}
 
 	//fragment
-	var fragment string
-	if U.Fragment != "" {
-		fragment = U.Fragment
-	}
+		fragment := U.Fragment
+		
 	return &URL{
 		Scheme:     scheme,
 		Host:       host,
