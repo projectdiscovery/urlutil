@@ -48,4 +48,12 @@ func TestParse(t *testing.T) {
 	U, err = Parse("https://a.b.c.d//d")
 	require.Nil(t, err, "could not parse url")
 	require.Equal(t, "https://a.b.c.d:443//d", U.String(), "unexpected url")
+	
+	// fragmented url
+	U, err = Parse("http://127.0.0.1/#a")
+	require.Nil(t, err, "could not parse url")
+	require.Equal(t, "http", U.Scheme, "different scheme")
+	require.Equal(t, "127.0.0.1", U.Host, "different host")
+	require.Equal(t, "a", U.Fragment, "different fragment")
+	require.Equal(t, "http://127.0.0.1:80/#a", U.String(), "different full url")
 }
