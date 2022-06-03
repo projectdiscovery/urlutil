@@ -109,9 +109,9 @@ func ParseWithScheme(u string) (*URL, error) {
 		requri = origReqURI
 	}
 
-	//fragment
-		fragment := U.Fragment
-		
+	// fragment
+	fragment := U.Fragment
+
 	return &URL{
 		Scheme:     scheme,
 		Host:       host,
